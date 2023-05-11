@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-CHOISES = (
+
+CHOICES = (
     ('User', 'Пользователь'),
     ('Admin', 'Администратор'),
     ('Moderator', 'Модератор')
@@ -9,8 +10,8 @@ CHOISES = (
 
 
 class Category(models.Model):
-    name = models.CharField('название', max_length=50)
-    slug = models.SlugField('слаг')
+    name = models.CharField('название', max_length=256)
+    slug = models.SlugField('слаг', max_length=50)
 
     class Meta:
         verbose_name = 'категория'
@@ -21,8 +22,8 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField('название', max_length=50)
-    slug = models.SlugField('слаг')
+    name = models.CharField('название', max_length=256)
+    slug = models.SlugField('слаг', max_length=50)
 
     class Meta:
         verbose_name = 'жанр'
@@ -33,12 +34,13 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField('название', max_length=50)
+    name = models.CharField('название', max_length=256)
     year = models.DateField('год выпуска')
     description = models.TextField('Описание',
                                    max_length=250,
                                    blank=True)
     category = models.ForeignKey(Category,
+                                 null=True,
                                  on_delete=models.SET_NULL,
                                  related_name='titles',
                                  verbose_name='категория')
@@ -56,7 +58,7 @@ class Title(models.Model):
 
 class User(AbstractUser):
     bio = models.TextField('биография', blank=True)
-    role = models.CharField('роль', max_length=50, choises=CHOISES)
+    role = models.CharField('роль', max_length=50, choices=CHOICES)
 
 
 class Review(models.Model):
@@ -64,12 +66,12 @@ class Review(models.Model):
     title = models.ForeignKey(Title,
                               on_delete=models.CASCADE,
                               related_name='reviews',
-                              verbose_name='название')
+                              verbose_name='произведение')
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
                                related_name='reviews',
                                verbose_name='автор')
-    score = models.IntegerField('счет')
+    score = models.IntegerField('оценка')
     pub_date = models.DateTimeField('дата публикации',
                                     auto_now_add=True)
 
