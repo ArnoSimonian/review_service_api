@@ -9,7 +9,7 @@ CHOICES = (
 )
 
 
-class Category(models.Model):
+class Categories(models.Model):
     name = models.CharField('название', max_length=256)
     slug = models.SlugField('слаг', max_length=50, unique=True)
 
@@ -21,7 +21,7 @@ class Category(models.Model):
         return self.slug
 
 
-class Genre(models.Model):
+class Genres(models.Model):
     name = models.CharField('название', max_length=256)
     slug = models.SlugField('слаг', max_length=50, unique=True)
 
@@ -33,17 +33,17 @@ class Genre(models.Model):
         return self.slug
 
 
-class Title(models.Model):
+class Titles(models.Model):
     name = models.CharField('название', max_length=256)
     year = models.IntegerField('год выпуска')
     description = models.TextField('Описание',
                                    blank=True)
-    category = models.ForeignKey(Category,
+    category = models.ForeignKey(Categories,
                                  null=True,
                                  on_delete=models.SET_NULL,
                                  related_name='titles',
                                  verbose_name='категория')
-    genre = models.ManyToManyField(Genre,
+    genre = models.ManyToManyField(Genres,
                                    through='GenreTitle')
 
     class Meta:
@@ -55,8 +55,8 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genres, on_delete=models.CASCADE)
+    title = models.ForeignKey(Titles, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.genre} {self.title}'
@@ -79,7 +79,7 @@ class User(AbstractUser):
 
 class Review(models.Model):
     text = models.TextField('текст')
-    title = models.ForeignKey(Title,
+    title = models.ForeignKey(Titles,
                               on_delete=models.CASCADE,
                               related_name='reviews',
                               verbose_name='произведение')
