@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -73,8 +74,7 @@ class User(AbstractUser):
     role = models.CharField('роль',
                             max_length=50,
                             choices=CHOICES,
-                            default='User',
-                            )
+                            default='User')
 
 
 class Review(models.Model):
@@ -87,13 +87,23 @@ class Review(models.Model):
                                on_delete=models.CASCADE,
                                related_name='reviews',
                                verbose_name='автор')
-    score = models.IntegerField('оценка')
+    score = models.PositiveSmallIntegerField(verbose_name='оценка',
+                                             validators=[
+                                                 MinValueValidator(1),
+                                                 MaxValueValidator(10)
+                                             ])
     pub_date = models.DateTimeField('дата публикации',
                                     auto_now_add=True)
 
     class Meta:
         verbose_name = 'отзыв'
         verbose_name_plural = 'отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_review'
+            )
+        ]
 
     def __str__(self):
         return self.text[:10]
