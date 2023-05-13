@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-
 CHOICES = (
     ('User', 'Пользователь'),
     ('Admin', 'Администратор'),
@@ -75,6 +74,9 @@ class User(AbstractUser):
                             choices=CHOICES,
                             default='User',
                             )
+    confirmation_code = models.CharField('код подтверждения',
+                                         max_length=4,
+                                         blank=True)
 
 
 class Review(models.Model):
