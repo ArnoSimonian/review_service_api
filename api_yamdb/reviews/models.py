@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 CHOICES = (
@@ -8,7 +9,7 @@ CHOICES = (
 )
 
 
-class Categories(models.Model):
+class Category(models.Model):
     name = models.CharField('название', max_length=256)
     slug = models.SlugField('слаг', max_length=50, unique=True)
 
@@ -20,7 +21,7 @@ class Categories(models.Model):
         return self.slug
 
 
-class Genres(models.Model):
+class Genre(models.Model):
     name = models.CharField('название', max_length=256)
     slug = models.SlugField('слаг', max_length=50, unique=True)
 
@@ -32,17 +33,17 @@ class Genres(models.Model):
         return self.slug
 
 
-class Titles(models.Model):
+class Title(models.Model):
     name = models.CharField('название', max_length=256)
     year = models.IntegerField('год выпуска')
     description = models.TextField('Описание',
                                    blank=True)
-    category = models.ForeignKey(Categories,
+    category = models.ForeignKey(Category,
                                  null=True,
                                  on_delete=models.SET_NULL,
                                  related_name='titles',
                                  verbose_name='категория')
-    genre = models.ManyToManyField(Genres,
+    genre = models.ManyToManyField(Genre,
                                    through='GenreTitle')
 
     class Meta:
@@ -54,8 +55,8 @@ class Titles(models.Model):
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genres, on_delete=models.CASCADE)
-    title = models.ForeignKey(Titles, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.genre} {self.title}'
@@ -81,7 +82,7 @@ class User(AbstractUser):
 
 class Review(models.Model):
     text = models.TextField('текст')
-    title = models.ForeignKey(Titles,
+    title = models.ForeignKey(Title,
                               on_delete=models.CASCADE,
                               related_name='reviews',
                               verbose_name='произведение')
@@ -89,13 +90,23 @@ class Review(models.Model):
                                on_delete=models.CASCADE,
                                related_name='reviews',
                                verbose_name='автор')
-    score = models.IntegerField('оценка')
+    score = models.PositiveSmallIntegerField(verbose_name='оценка',
+                                             validators=[
+                                                 MinValueValidator(1),
+                                                 MaxValueValidator(10)
+                                             ])
     pub_date = models.DateTimeField('дата публикации',
                                     auto_now_add=True)
 
     class Meta:
         verbose_name = 'отзыв'
         verbose_name_plural = 'отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_review'
+            )
+        ]
 
     def __str__(self):
         return self.text[:10]
