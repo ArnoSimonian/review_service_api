@@ -14,6 +14,7 @@ class Category(models.Model):
     slug = models.SlugField('слаг', max_length=50, unique=True)
 
     class Meta:
+        ordering = ('-name',)
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
 
@@ -26,6 +27,7 @@ class Genre(models.Model):
     slug = models.SlugField('слаг', max_length=50, unique=True)
 
     class Meta:
+        ordering = ('-name',)
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
 
@@ -45,8 +47,10 @@ class Title(models.Model):
                                  verbose_name='категория')
     genre = models.ManyToManyField(Genre,
                                    through='GenreTitle')
+    rating = models.IntegerField('рейтинг', blank=True)
 
     class Meta:
+        ordering = ('-rating',)
         verbose_name = 'произведение'
         verbose_name_plural = 'произведения'
 
@@ -99,6 +103,7 @@ class Review(models.Model):
                                     auto_now_add=True)
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'отзыв'
         verbose_name_plural = 'отзывы'
         constraints = [
@@ -126,6 +131,7 @@ class Comment(models.Model):
                                     auto_now_add=True)
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'комментарий'
         verbose_name_plural = 'комментарии'
 
