@@ -47,7 +47,7 @@ class Title(models.Model):
                                  verbose_name='категория')
     genre = models.ManyToManyField(Genre,
                                    through='GenreTitle')
-    rating = models.IntegerField('рейтинг', blank=True)
+    rating = models.IntegerField('рейтинг', blank=True, null=True)
 
     class Meta:
         ordering = ('-rating',)

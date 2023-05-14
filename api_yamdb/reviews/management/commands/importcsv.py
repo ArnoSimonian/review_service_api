@@ -7,15 +7,14 @@ from reviews.models import (
     Genre,
     User,
     Review,
+    Title,
 )
 
 TABLES = {
     Genre: 'genre.csv',
     Category: 'category.csv',
     User: 'users.csv',
-    Review: 'review.csv'
-
-
+    Title: 'titles.csv'
 }
 
 

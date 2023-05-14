@@ -20,7 +20,11 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleCreateSerializer, TitleRetrieveListSerializer
+    serializer_class = TitleCreateSerializer
+    def get_serializer_class(self):
+        if self.action == 'list' or 'retrieve':
+            return TitleRetrieveListSerializer
+        return TitleCreateSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
