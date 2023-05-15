@@ -13,7 +13,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -26,6 +25,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'reviews',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -59,7 +59,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
-
 # Database
 
 DATABASES = {
@@ -68,7 +67,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 
@@ -92,6 +90,16 @@ AUTH_PASSWORD_VALIDATORS = [
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'admin@yamdb.ru'
 
+# SIMPLE_JWT settings
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'BLACKLIST_AFTER_ROTATION': False,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+}
+
 # Internationalization
 
 LANGUAGE_CODE = 'en-us'
@@ -103,7 +111,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 
@@ -118,15 +125,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
 
-    #'DEFAULT_AUTHENTICATION_CLASSES': [
-    #    'rest_framework_simplejwt.authentication.JWTAuthentication',
-    #],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
 }
-
-#SIMPLE_JWT = {
-#   'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-#   'AUTH_HEADER_TYPES': ('Bearer',),
-#    'BLACKLIST_AFTER_ROTATION': False,
-#}

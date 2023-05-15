@@ -1,9 +1,17 @@
+import re
+
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
-from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title, \
-    User, CHOICES
+from reviews.models import (Category,
+                            Comment,
+                            Genre,
+                            GenreTitle,
+                            Review,
+                            Title,
+                            User,
+                            CHOICES)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -34,7 +42,7 @@ class TitleRetrieveListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-        'id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category')
 
     def get_rating(self, obj):
         rating = obj.reviews.aggregate(Avg('score'))['score__avg']
@@ -91,3 +99,35 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email')
+
+    # def validate_username(self, value):
+    #     reg_expression = re.compile('^[\w.@+-]+\z')
+    #     if not reg_expression.match(value):
+    #         raise serializers.ValidationError(
+    #             'Имя пользователя не соответствует регулярному выражению!'
+    #         )
+    #     return value
+
+
+class MyTokenObtainSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=50)
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
+
+    def validate(self, data):
+        if not User.objects.filter(
+                username=data['username'],
+                confirmation_code=data['confirmation_code']
+        ).exists():
+            raise serializers.ValidationError('Пользователь не найден!')
+        return data
+
+    # def validate_username(self, value):
+    #     reg_expression = re.compile('^[\w.@+-]+\z')
+    #     if not reg_expression.match(value):
+    #         raise serializers.ValidationError(
+    #             'Имя пользователя не соответствует регулярному выражению!'
+    #         )
+    #     return value
