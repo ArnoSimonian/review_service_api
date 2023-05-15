@@ -87,6 +87,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# EMAIL settings
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'admin@yamdb.ru'
 
 # Internationalization
 

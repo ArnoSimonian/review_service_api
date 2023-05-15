@@ -1,11 +1,23 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from rest_framework.pagination import LimitOffsetPagination
+import random
 
-from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title, User
-from .serializers import (CategorySerializer, CommentSerializer, GenreSerializer, 
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
+from rest_framework import mixins, viewsets
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny
+
+from reviews.models import (Category,
+                            Comment,
+                            Genre,
+                            GenreTitle,
+                            Review,
+                            Title,
+                            User)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer,
                           ReviewSerializer, TitleCreateSerializer,
-                          TitleRetrieveListSerializer, UserSerializer)
+                          TitleRetrieveListSerializer, UserSerializer,
+                          UserRegistrationSerializer)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -30,7 +42,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    #permission_classes = (IsAuthorOrReadOnly,)
+    # permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
     def get_title(self):
@@ -45,7 +57,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    #permission_classes = (IsAuthorOrReadOnly,)
+    # permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
     def get_review(self):
@@ -58,3 +70,21 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.get_review().comments.all()
+
+
+class UserRegistrationViewSet(mixins.CreateModelMixin,
+                              viewsets.GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserRegistrationSerializer
+    permission_classes = (AllowAny,)
+
+    def perform_create(self, serializer):
+        confirmation_code = str(random.randrange(1000, 9999, 1))
+        send_mail(
+            'confirmation_code',
+            message=confirmation_code,
+            from_email=None,
+            recipient_list=[serializer.validated_data.get('email')],
+            fail_silently=False,
+        )
+        serializer.save(confirmation_code=confirmation_code)
