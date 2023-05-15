@@ -2,9 +2,12 @@ import random
 
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import (Category,
                             Comment,
@@ -14,7 +17,7 @@ from reviews.models import (Category,
                             Title,
                             User)
 from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer,
+                          GenreSerializer, MyTokenObtainSerializer,
                           ReviewSerializer, TitleCreateSerializer,
                           TitleRetrieveListSerializer, UserSerializer,
                           UserRegistrationSerializer)
@@ -88,3 +91,21 @@ class UserRegistrationViewSet(mixins.CreateModelMixin,
             fail_silently=False,
         )
         serializer.save(confirmation_code=confirmation_code)
+
+
+class MyTokenObtainApiView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = MyTokenObtainSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                return Response(serializer.errors,
+                                status=status.HTTP_404_NOT_FOUND)
+            access_token = AccessToken.for_user(user)
+            return Response({'token': str(access_token)},
+                            status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
