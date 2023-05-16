@@ -89,6 +89,9 @@ class User(AbstractUser):
     @property
     def is_moderator(self):
         return self.is_moderator
+    
+    def __str__(self):
+        return self.username
 
 
 class Review(models.Model):
