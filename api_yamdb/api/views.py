@@ -16,6 +16,7 @@ from reviews.models import (Category,
                             Review,
                             Title,
                             User)
+from .permissions import IsAuthorOrAdminOrModeratorOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainSerializer,
                           ReviewSerializer, TitleCreateSerializer,
@@ -45,11 +46,11 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    # permission_classes = (IsAuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
     def get_title(self):
-        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.get_title())
@@ -60,13 +61,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    # permission_classes = (IsAuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
     def get_review(self):
         return get_object_or_404(Review,
-                                 review_pk=self.kwargs.get('review_id'),
-                                 title_pk=self.kwargs.get('title_id'))
+                                 id=self.kwargs.get('review_id'),
+                                 title_id=self.kwargs.get('title_id'))
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self.get_review())

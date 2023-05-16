@@ -47,10 +47,9 @@ class Title(models.Model):
                                  verbose_name='категория')
     genre = models.ManyToManyField(Genre,
                                    through='GenreTitle')
-    rating = models.IntegerField('рейтинг', blank=True, null=True)
 
     class Meta:
-        ordering = ('-rating',)
+        ordering = ('-name',)
         verbose_name = 'произведение'
         verbose_name_plural = 'произведения'
 
@@ -70,7 +69,7 @@ class User(AbstractUser):
     username = models.CharField('имя пользователя',
                                 max_length=150,
                                 unique=True)
-    email = models.CharField('почта', max_length=254, unique=True)
+    email = models.EmailField('email', max_length=254, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField('биография', blank=True)
@@ -82,6 +81,18 @@ class User(AbstractUser):
     confirmation_code = models.CharField('код подтверждения',
                                          max_length=4,
                                          blank=True)
+
+    @property
+    def is_admin(self):
+        return self.is_admin
+
+    @property
+    def is_moderator(self):
+        return self.is_moderator
+
+    @property
+    def is_superuser(self):
+        return self.is_superuser
 
 
 class Review(models.Model):
