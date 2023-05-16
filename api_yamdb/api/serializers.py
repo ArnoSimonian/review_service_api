@@ -109,7 +109,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class MyTokenObtainSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=50)
+    username = serializers.CharField(max_length=150)
 
     class Meta:
         model = User
