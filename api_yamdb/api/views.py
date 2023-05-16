@@ -8,9 +8,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from api.permissions import (
-    IsAdmin,
-)
+
 
 from reviews.models import (Category,
                             Comment,
@@ -30,7 +28,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated,permissions.IsAdminUser)
+    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
