@@ -90,10 +90,6 @@ class User(AbstractUser):
     def is_moderator(self):
         return self.is_moderator
 
-    @property
-    def is_superuser(self):
-        return self.is_superuser
-
 
 class Review(models.Model):
     text = models.TextField('текст')
