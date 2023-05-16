@@ -1,3 +1,5 @@
+import re
+
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
@@ -17,7 +19,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role')
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -99,14 +102,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email')
 
-    # def validate_username(self, value):
-    #     reg_expression = re.compile('^[\w.@+-]+\z')
-    #     if not reg_expression.match(value):
-    #         raise serializers.ValidationError(
-    #             'Имя пользователя не соответствует регулярному выражению!'
-    #         )
-    #     return value
-
 
 class MyTokenObtainSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=150)
@@ -123,10 +118,10 @@ class MyTokenObtainSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Пользователь не найден!')
         return data
 
-    # def validate_username(self, value):
-    #     reg_expression = re.compile('^[\w.@+-]+\z')
-    #     if not reg_expression.match(value):
-    #         raise serializers.ValidationError(
-    #             'Имя пользователя не соответствует регулярному выражению!'
-    #         )
-    #     return value
+    def validate_username(self, value):
+        reg_expression = re.compile(r'^[\w.@+-]+\Z')
+        if not reg_expression.match(value):
+            raise serializers.ValidationError(
+                'Имя пользователя не соответствует регулярному выражению!'
+            )
+        return value
