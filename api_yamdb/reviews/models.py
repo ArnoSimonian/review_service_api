@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (MaxValueValidator,
+                                    MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 CHOICES = (
@@ -68,7 +70,14 @@ class GenreTitle(models.Model):
 class User(AbstractUser):
     username = models.CharField('имя пользователя',
                                 max_length=150,
-                                unique=True)
+                                unique=True,
+                                validators=[
+                                    RegexValidator(
+                                        regex=r'^[\w.@+-]+\Z',
+                                        message='Не соответствует регулярному выражению!',
+                                    ),
+                                ]
+                                )
     email = models.EmailField('email', max_length=254, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
@@ -91,6 +100,9 @@ class User(AbstractUser):
     def is_moderator(self):
         if self.role == 'Модератор':
             return self.is_moderator
+
+    def __str__(self):
+        return self.username
 
 
 class Review(models.Model):
