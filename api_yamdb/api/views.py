@@ -29,6 +29,8 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+    lookup_field = 'username'
+
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
