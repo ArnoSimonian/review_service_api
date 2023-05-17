@@ -84,11 +84,13 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.is_admin
+        if self.role == 'Администратор':
+            return self.is_admin
 
     @property
     def is_moderator(self):
-        return self.is_moderator
+        if self.role == 'Модератор':
+            return self.is_moderator
 
 
 class Review(models.Model):

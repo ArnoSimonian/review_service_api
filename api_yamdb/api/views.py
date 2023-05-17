@@ -3,14 +3,12 @@ import random
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets, permissions
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from api.permissions import (
-    IsAdmin,
-)
+
 
 from reviews.models import (Category,
                             Comment,
@@ -55,7 +53,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -70,7 +68,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
 
     def get_review(self):
         return get_object_or_404(Review,
