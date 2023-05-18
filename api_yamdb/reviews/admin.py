@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Title, User
+from .models import Category, Title, User, Genre
 
 
 @admin.register(Title)
@@ -20,6 +20,19 @@ class TitleAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'name',
+        'slug'
+    )
+    list_editable = ('slug',)
+    search_fields = ('name',)
+    list_filter = ('slug',)
+    empty_value_display = '-пусто-'
+
+
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'name',
