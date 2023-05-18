@@ -22,3 +22,17 @@ class IsAuthorOrAdminOrModeratorOrReadOnly(permissions.BasePermission):
             or request.user.is_moderator
             or request.user.is_superuser
         )
+
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    """
+    Кастомный класс разрешений.
+    Разрешает только администратору изменять или удалять произведения.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or ((request.user.is_admin or request.user.is_superuser)
+                and request.user.is_authenticated)
+        )

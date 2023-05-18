@@ -4,12 +4,6 @@ from django.core.validators import (MaxValueValidator,
                                     RegexValidator)
 from django.db import models
 
-CHOICES = (
-    ('User', 'Пользователь'),
-    ('Admin', 'Администратор'),
-    ('Moderator', 'Модератор')
-)
-
 
 class Category(models.Model):
     name = models.CharField('название', max_length=256)
@@ -68,6 +62,16 @@ class GenreTitle(models.Model):
 
 
 class User(AbstractUser):
+    USER = 'User'
+    ADMIN = 'Admin'
+    MODERATOR = 'Moderator'
+
+    ROLE_CHOICES = (
+        (USER, 'Пользователь'),
+        (ADMIN, 'Администратор'),
+        (MODERATOR, 'Модератор'),
+    )
+
     username = models.CharField('имя пользователя',
                                 max_length=150,
                                 unique=True,
@@ -84,22 +88,24 @@ class User(AbstractUser):
     bio = models.TextField('биография', blank=True)
     role = models.CharField('роль',
                             max_length=50,
-                            choices=CHOICES,
-                            default='User',
-                            )
+                            choices=ROLE_CHOICES,
+                            default=USER)
     confirmation_code = models.CharField('код подтверждения',
                                          max_length=4,
                                          blank=True)
 
     @property
     def is_admin(self):
-        if self.role == 'Администратор':
-            return self.is_admin
+        return self.role == self.ADMIN
+    #and self.is_staff == True
 
     @property
     def is_moderator(self):
-        if self.role == 'Модератор':
-            return self.is_moderator
+        return self.role == self.MODERATOR
+
+    @property
+    def is_user(self):
+        return self.role == self.USER
 
     def __str__(self):
         return self.username
