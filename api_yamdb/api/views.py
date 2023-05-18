@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.decorators import action
 
 
 from reviews.models import (Category,
@@ -23,7 +24,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainSerializer,
                           ReviewSerializer, TitleCreateSerializer,
                           TitleRetrieveListSerializer, UserSerializer,
-                          UserRegistrationSerializer)
+                          UserRegistrationSerializer, MeSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -31,6 +32,24 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
     lookup_field = 'username'
+
+    @action(methods=['GET', 'PATCH'],
+            detail=False,
+            permission_classes=(IsAuthenticated,),
+            url_path='me')
+    def me(self, request):
+        user = request.user
+        serializer = self.get_serializer(user)
+        if request.method == 'PATCH':
+            serializer = MeSerializer(
+                request.user,
+                data=request.data,
+                partial=True
+                )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        return Response(serializer.data)
+        
 
 
 class GenreViewSet(mixins.CreateModelMixin,
