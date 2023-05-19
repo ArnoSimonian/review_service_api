@@ -97,8 +97,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField('биография', blank=True)
     confirmation_code = models.CharField('код подтверждения',
-                                         max_length=4,
-                                         blank=True)
+                                         max_length=4)
 
     @property
     def is_admin(self):

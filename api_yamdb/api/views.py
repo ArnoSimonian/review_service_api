@@ -11,7 +11,6 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import action
 
-
 from reviews.models import (Category,
                             Comment,
                             Genre,
@@ -20,7 +19,8 @@ from reviews.models import (Category,
                             Title,
                             User)
 from .filters import TitleFilter
-from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrModeratorOrReadOnly
+from .permissions import IsAdminOrReadOnly, \
+    IsAuthorOrAdminOrModeratorOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainSerializer,
                           ReviewSerializer, TitleCreateSerializer,
@@ -46,11 +46,11 @@ class UserViewSet(viewsets.ModelViewSet):
                 request.user,
                 data=request.data,
                 partial=True
-                )
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
         return Response(serializer.data)
-        
+
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,
                                mixins.ListModelMixin,
@@ -78,7 +78,7 @@ class CategoryViewSet(CreateListDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    #http_method_names = ['get', 'post', 'delete', 'patch']
+    # http_method_names = ['get', 'post', 'delete', 'patch']
     queryset = Title.objects.all()
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -95,7 +95,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
-    #pagination_class = PageNumberPagination
+
+    # pagination_class = PageNumberPagination
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -110,7 +111,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
-    #pagination_class = PageNumberPagination
+
+    # pagination_class = PageNumberPagination
 
     def get_review(self):
         return get_object_or_404(Review,
@@ -124,22 +126,23 @@ class CommentViewSet(viewsets.ModelViewSet):
         return self.get_review().comments.all()
 
 
-class UserRegistrationViewSet(mixins.CreateModelMixin,
-                              viewsets.GenericViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserRegistrationSerializer
+class UserRegistrationView(APIView):
     permission_classes = (AllowAny,)
 
-    def perform_create(self, serializer):
-        confirmation_code = str(random.randrange(1000, 9999, 1))
-        send_mail(
-            'confirmation_code',
-            message=confirmation_code,
-            from_email=None,
-            recipient_list=[serializer.validated_data.get('email')],
-            fail_silently=False,
-        )
-        serializer.save(confirmation_code=confirmation_code)
+    def post(self, request):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            confirmation_code = str(random.randrange(1000, 9999, 1))
+            send_mail(
+                'confirmation_code',
+                message=confirmation_code,
+                from_email=None,
+                recipient_list=[serializer.validated_data.get('email')],
+                fail_silently=False,
+            )
+            serializer.save(confirmation_code=confirmation_code)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MyTokenObtainApiView(APIView):
@@ -149,10 +152,12 @@ class MyTokenObtainApiView(APIView):
         serializer = MyTokenObtainSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
+            confirmation_code = serializer.validated_data['confirmation_code']
             try:
-                user = User.objects.get(username=username)
+                user = User.objects.get(username=username,
+                                        confirmation_code=confirmation_code)
             except User.DoesNotExist:
-                return Response(serializer.errors,
+                return Response({'username': 'Пользователь не найден!'},
                                 status=status.HTTP_404_NOT_FOUND)
             access_token = AccessToken.for_user(user)
             return Response({'token': str(access_token)},

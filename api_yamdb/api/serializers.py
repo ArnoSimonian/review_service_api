@@ -16,7 +16,7 @@ from reviews.models import (Category,
 
 
 class UserSerializer(serializers.ModelSerializer):
-    #role = serializers.CharField(read_only=True)
+    # role = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
@@ -66,7 +66,7 @@ class TitleRetrieveListSerializer(serializers.ModelSerializer):
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
-    #name = serializers.CharField(max_length=256)
+    # name = serializers.CharField(max_length=256)
     category = SlugRelatedField(slug_field='slug',
                                 queryset=Category.objects.all())
     genre = SlugRelatedField(slug_field='slug',
@@ -81,7 +81,8 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 
     def validate_year(self, value):
         if value > datetime.date.today().year:
-            raise serializers.ValidationError('Год выпуска произведения не может быть больше текущего.')
+            raise serializers.ValidationError(
+                'Год выпуска произведения не может быть больше текущего.')
         return value
 
     def to_representation(self, instance):
@@ -126,6 +127,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email')
 
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Это имя использовать запрещено!'
+            )
+        return value
+
 
 class MyTokenObtainSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=150)
@@ -134,18 +142,10 @@ class MyTokenObtainSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'confirmation_code')
 
-    def validate(self, data):
-        if not User.objects.filter(
-                username=data['username'],
-                confirmation_code=data['confirmation_code']
-        ).exists():
-            raise serializers.ValidationError('Пользователь не найден!')
-        return data
-
     def validate_username(self, value):
         reg_expression = re.compile(r'^[\w.@+-]+\Z')
         if not reg_expression.match(value):
             raise serializers.ValidationError(
-                'Имя пользователя не соответствует регулярному выражению!'
+                'Отсутствует обязательное поле или оно некорректно!'
             )
         return value
