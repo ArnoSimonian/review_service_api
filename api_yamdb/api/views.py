@@ -19,7 +19,8 @@ from reviews.models import (Category,
                             Title,
                             User)
 from .filters import TitleFilter
-from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrModeratorOrReadOnly, IsAdmin
+from .permissions import IsAdminOrReadOnly, \
+    IsAuthorOrAdminOrModeratorOrReadOnly, IsAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainSerializer,
                           ReviewSerializer, TitleCreateSerializer,
@@ -126,27 +127,34 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class UserRegistrationView(APIView):
-    permission_classes = (AllowAny,)
+    def get_confirmation_code(self):
+        return str(random.randrange(1000, 9999, 1))
+
+    def send_email(self, email, confirmation_code):
+        send_mail(
+            'confirmation_code',
+            message=confirmation_code,
+            from_email=None,
+            recipient_list=[email],
+            fail_silently=False,
+        )
 
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
+        # if User.objects.get(username=serializer.initial_data['username'],
+        #                     email=serializer.initial_data['email']).exists():
+        #     return Response({'user': 'Такой пользователь уже есть в базе'},
+        #                     status=status.HTTP_200_OK)
         if serializer.is_valid():
-            confirmation_code = str(random.randrange(1000, 9999, 1))
-            send_mail(
-                'confirmation_code',
-                message=confirmation_code,
-                from_email=None,
-                recipient_list=[serializer.validated_data.get('email')],
-                fail_silently=False,
-            )
+            confirmation_code = self.get_confirmation_code()
+            self.send_email(serializer.validated_data['email'],
+                            confirmation_code)
             serializer.save(confirmation_code=confirmation_code)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MyTokenObtainApiView(APIView):
-    permission_classes = (AllowAny,)
-
     def post(self, request):
         serializer = MyTokenObtainSerializer(data=request.data)
         if serializer.is_valid():
