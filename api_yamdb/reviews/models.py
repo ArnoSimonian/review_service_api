@@ -13,6 +13,12 @@ class Category(models.Model):
         ordering = ('-name',)
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'slug'],
+                name='unique_slug'
+            )
+        ]
 
     def __str__(self):
         return self.slug

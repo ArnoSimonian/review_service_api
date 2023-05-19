@@ -1,8 +1,10 @@
+import datetime
 import re
 
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
+from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import (Category,
                             Comment,
@@ -14,13 +16,13 @@ from reviews.models import (Category,
 
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.ChoiceField(choices=User.ROLE_CHOICES)
+    #role = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role')
-        
+
 
 class MeSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
@@ -31,6 +33,13 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('name', 'slug')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Category.objects.all(),
+                fields=('name', 'slug'),
+                message="Поле slug каждой категории должно быть уникальным."
+            )
+        ]
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -40,8 +49,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleRetrieveListSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True)
-    category = CategorySerializer()
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
     rating = serializers.SerializerMethodField()
 
     class Meta:
@@ -57,17 +66,24 @@ class TitleRetrieveListSerializer(serializers.ModelSerializer):
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
+    #name = serializers.CharField(max_length=256)
     category = SlugRelatedField(slug_field='slug',
                                 queryset=Category.objects.all())
     genre = SlugRelatedField(slug_field='slug',
                              queryset=Genre.objects.all(),
                              many=True)
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category')
-        
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+
+    def validate_year(self, value):
+        if value > datetime.date.today().year:
+            raise serializers.ValidationError('Год выпуска произведения не может быть больше текущего.')
+        return value
+
     def to_representation(self, instance):
         return TitleRetrieveListSerializer(instance).data
 

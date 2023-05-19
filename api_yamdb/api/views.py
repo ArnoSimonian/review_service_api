@@ -19,6 +19,7 @@ from reviews.models import (Category,
                             Review,
                             Title,
                             User)
+from .filters import TitleFilter
 from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrModeratorOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainSerializer,
@@ -51,36 +52,38 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
         
 
+class CreateListDestroyViewSet(mixins.CreateModelMixin,
+                               mixins.ListModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet):
+    pass
 
-class GenreViewSet(mixins.CreateModelMixin,
-                   mixins.ListModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+
+class GenreViewSet(CreateListDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('slug',)
+    search_fields = ('name',)
 
 
-class CategoryViewSet(mixins.CreateModelMixin,
-                      mixins.ListModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('slug',)
+    search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    #http_method_names = ['get', 'post', 'delete', 'patch']
     queryset = Title.objects.all()
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
     filterset_fields = ('category', 'genre', 'name', 'year')
 
     def get_serializer_class(self):
