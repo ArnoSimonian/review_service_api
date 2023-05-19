@@ -20,7 +20,7 @@ from reviews.models import (Category,
                             Title,
                             User)
 from .filters import TitleFilter
-from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrModeratorOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrModeratorOrReadOnly, IsAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MyTokenObtainSerializer,
                           ReviewSerializer, TitleCreateSerializer,
@@ -31,7 +31,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated, IsAdminUser,)
+    permission_classes = (IsAuthenticated, IsAdmin)
     lookup_field = 'username'
 
     @action(methods=['GET', 'PATCH'],
