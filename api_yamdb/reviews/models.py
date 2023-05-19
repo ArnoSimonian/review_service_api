@@ -68,9 +68,9 @@ class GenreTitle(models.Model):
 
 
 class User(AbstractUser):
-    USER = 'User'
-    ADMIN = 'Admin'
-    MODERATOR = 'Moderator'
+    USER = 'user'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
 
     ROLE_CHOICES = (
         (USER, 'Пользователь'),
@@ -86,13 +86,17 @@ class User(AbstractUser):
                                         regex=r'^[\w.@+-]+\Z',
                                         message='Не соответствует регулярному выражению!',
                                     ),
-                                ]
+                                ],
+                                blank=False,
+                                null=False,
                                 )
-    email = models.EmailField('email', max_length=254, unique=True)
+    email = models.EmailField('email', max_length=254, unique=True, blank=False,
+        null=False,)
     role = models.CharField('роль',
                             max_length=150,
                             choices=ROLE_CHOICES,
-                            default=USER)
+                            default=USER,
+                            blank=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField('биография', blank=True)
