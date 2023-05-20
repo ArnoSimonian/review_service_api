@@ -116,6 +116,11 @@ class User(AbstractUser):
     def is_user(self):
         return self.role == self.USER
 
+    class Meta:
+        ordering = ('-username',)
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'
+
     def __str__(self):
         return self.username
 
