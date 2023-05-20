@@ -1,6 +1,7 @@
 import random
 
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -142,32 +143,34 @@ class UserRegistrationView(APIView):
 
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
-        # if User.objects.get(username=serializer.initial_data['username'],
-        #                     email=serializer.initial_data['email']).exists():
-        #     return Response({'user': 'Такой пользователь уже есть в базе'},
-        #                     status=status.HTTP_200_OK)
-        if serializer.is_valid():
-            confirmation_code = self.get_confirmation_code()
-            self.send_email(serializer.validated_data['email'],
-                            confirmation_code)
-            serializer.save(confirmation_code=confirmation_code)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        username = serializer.validated_data['username']
+        try:
+            user, create = User.objects.get_or_create(
+                username=username,
+                email=email
+            )
+        except IntegrityError:
+            return Response(
+                'Такой логин или email уже существуют',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        confirmation_code = self.get_confirmation_code()
+        user.confirmation_code = confirmation_code
+        user.save()
+        self.send_email(email, confirmation_code)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class MyTokenObtainApiView(APIView):
     def post(self, request):
         serializer = MyTokenObtainSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data['username']
-            confirmation_code = serializer.validated_data['confirmation_code']
-            try:
-                user = User.objects.get(username=username,
-                                        confirmation_code=confirmation_code)
-            except User.DoesNotExist:
-                return Response({'username': 'Пользователь не найден!'},
-                                status=status.HTTP_404_NOT_FOUND)
-            access_token = AccessToken.for_user(user)
-            return Response({'token': str(access_token)},
-                            status=status.HTTP_200_OK)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data['username']
+        confirmation_code = serializer.validated_data['confirmation_code']
+        user = get_object_or_404(User, username=username)
+        if confirmation_code == user.confirmation_code:
+            token = str(AccessToken.for_user(user))
+            return Response({'token': token}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

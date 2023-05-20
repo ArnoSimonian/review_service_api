@@ -2,6 +2,7 @@ import datetime
 import re
 
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
@@ -103,7 +104,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate(self, data):
         title_id = self.context['view'].kwargs.get('title_id')
         request = self.context['request']
-        if request.method == 'POST' and Review.objects.filter(title_id=title_id, author=request.user).exists():
+        if request.method == 'POST' and Review.objects.filter(
+                title_id=title_id, author=request.user).exists():
             raise serializers.ValidationError(
                 'Нельзя оставить отзыв к одному произведению дважды.'
             )
@@ -122,25 +124,30 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'pub_date')
 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username', 'email')
+class UserRegistrationSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=254)
+
+    # class Meta:
+    #     model = User
+    #     fields = ('username', 'email')
 
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(
                 'Это имя использовать запрещено!'
             )
+        reg_expression = re.compile(r'^[\w.@+-]+\Z')
+        if not reg_expression.match(value):
+            raise serializers.ValidationError(
+                'Отсутствует обязательное поле или оно некорректно!'
+            )
         return value
 
 
-class MyTokenObtainSerializer(serializers.ModelSerializer):
+class MyTokenObtainSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')
+    confirmation_code = serializers.CharField()
 
     def validate_username(self, value):
         reg_expression = re.compile(r'^[\w.@+-]+\Z')
