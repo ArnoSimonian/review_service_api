@@ -8,26 +8,30 @@ from reviews.models import (
     User,
     Review,
     Title,
+    Comment,
+    GenreTitle
 )
-
 TABLES = {
-    Genre: 'genre.csv',
-    Category: 'category.csv',
     User: 'users.csv',
-    Title: 'titles.csv'
+    Category: 'category.csv',
+    Genre: 'genre.csv',
+    Title: 'titles.csv',
+    Review: 'review.csv',
+    Comment: 'comments.csv',
+    GenreTitle: 'genre_title.csv',
 }
 
 
 class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
-        for model, csv_file in TABLES.items():
+        for model, csv_f in TABLES.items():
             with open(
-                f'{settings.BASE_DIR}/static/data/{csv_file}',
+                f'{settings.BASE_DIR}/static/data/{csv_f}',
                 'r',
                 encoding='utf-8'
             ) as csv_file:
                 reader = csv.DictReader(csv_file)
                 model.objects.bulk_create(
                     model(**data) for data in reader)
-            self.stdout.write(self.style.SUCCESS(f'Done {model.__name__}'))
+        self.stdout.write(self.style.SUCCESS('Все данные загружены'))

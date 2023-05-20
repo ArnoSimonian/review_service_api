@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from datetime import timedelta
-import rest_framework_simplejwt
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

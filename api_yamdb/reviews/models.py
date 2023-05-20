@@ -84,14 +84,11 @@ class User(AbstractUser):
                                 validators=[
                                     RegexValidator(
                                         regex=r'^[\w.@+-]+\Z',
-                                        message='Не соответствует регулярному выражению!',
+                                        message='Не соответствует Regex!',
                                     ),
                                 ],
-                                blank=False,
-                                null=False,
                                 )
-    email = models.EmailField('email', max_length=254, unique=True, blank=False,
-        null=False,)
+    email = models.EmailField('email', max_length=254, unique=True)
     role = models.CharField('роль',
                             max_length=150,
                             choices=ROLE_CHOICES,
@@ -106,7 +103,8 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return self.role == self.ADMIN
-    #and self.is_staff == True
+
+    # and self.is_staff == True
 
     @property
     def is_moderator(self):
@@ -117,12 +115,12 @@ class User(AbstractUser):
         return self.role == self.USER
 
     class Meta:
-        ordering = ('-username',)
+        # ordering = ('-username',)
         verbose_name = 'пользователь'
         verbose_name_plural = 'пользователи'
 
-    def __str__(self):
-        return self.username
+    # def __str__(self):
+    #     return self.username
 
 
 class Review(models.Model):
