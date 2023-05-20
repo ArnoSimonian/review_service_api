@@ -128,10 +128,6 @@ class UserRegistrationSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField(max_length=254)
 
-    # class Meta:
-    #     model = User
-    #     fields = ('username', 'email')
-
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(

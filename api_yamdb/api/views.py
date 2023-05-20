@@ -147,7 +147,7 @@ class UserRegistrationView(APIView):
         email = serializer.validated_data['email']
         username = serializer.validated_data['username']
         try:
-            user, create = User.objects.get_or_create(
+            user, _ = User.objects.get_or_create(
                 username=username,
                 email=email
             )
