@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
+from django.conf import settings
 from reviews.models import Category, Genre, Review, Title, User
 from .filters import TitleFilter
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
@@ -40,7 +41,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(user)
         if request.method == 'PATCH':
             serializer = MeSerializer(
-                request.user,
+                user,
                 data=request.data,
                 partial=True
             )
@@ -120,7 +121,9 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class UserRegistrationView(APIView):
     def get_confirmation_code(self):
-        return str(random.randrange(1000, 9999, 1))
+        return str(random.randrange(settings.START_NUM,
+                                    settings.FINAL_NUM,
+                                    settings.GAP))
 
     def send_email(self, email, confirmation_code):
         send_mail(

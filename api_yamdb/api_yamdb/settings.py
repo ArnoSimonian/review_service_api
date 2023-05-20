@@ -131,3 +131,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
 }
+
+START_NUM = 1000
+FINAL_NUM = 9999
+GAP = 1
