@@ -9,7 +9,6 @@ from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import (Category,
                             Comment,
                             Genre,
-                            GenreTitle,
                             Review,
                             Title,
                             User)
@@ -66,7 +65,6 @@ class TitleRetrieveListSerializer(serializers.ModelSerializer):
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
-    # name = serializers.CharField(max_length=256)
     category = SlugRelatedField(slug_field='slug',
                                 queryset=Category.objects.all())
     genre = SlugRelatedField(slug_field='slug',
@@ -135,8 +133,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return value
 
 
-class MyTokenObtainSerializer(serializers.ModelSerializer):
+class MyTokenObtainSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
+    confirmation_code = serializers.CharField()
 
     class Meta:
         model = User
@@ -149,3 +148,11 @@ class MyTokenObtainSerializer(serializers.ModelSerializer):
                 'Отсутствует обязательное поле или оно некорректно!'
             )
         return value
+
+    def validate_code(self, data):
+        user = User.objects.get(username=data['username'])
+        if data['confirmation_code'] != user.confirmation_code:
+            raise serializers.ValidationError(
+                {'Неверный код подтверждения.'}
+            )
+        return data

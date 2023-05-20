@@ -1,5 +1,7 @@
 import random
 
+from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -11,9 +13,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import action
 
 from reviews.models import (Category,
-                            Comment,
                             Genre,
-                            GenreTitle,
                             Review,
                             Title,
                             User)
@@ -97,8 +97,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
 
-    # pagination_class = PageNumberPagination
-
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
 
@@ -113,8 +111,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
 
-    # pagination_class = PageNumberPagination
-
     def get_review(self):
         return get_object_or_404(Review,
                                  id=self.kwargs.get('review_id'),
@@ -128,8 +124,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class UserRegistrationView(APIView):
-    def get_confirmation_code(self):
-        return str(random.randrange(1000, 9999, 1))
+    # def get_confirmation_code(self):
+    #     return str(random.randrange(1000, 9999, 1))
 
     def send_email(self, email, confirmation_code):
         send_mail(
@@ -146,13 +142,14 @@ class UserRegistrationView(APIView):
         #                     email=serializer.initial_data['email']).exists():
         #     return Response({'user': 'Такой пользователь уже есть в базе'},
         #                     status=status.HTTP_200_OK)
-        if serializer.is_valid():
-            confirmation_code = self.get_confirmation_code()
-            self.send_email(serializer.validated_data['email'],
-                            confirmation_code)
-            serializer.save(confirmation_code=confirmation_code)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user = User.objects.get_or_create(**serializer.validated_data)
+        confirmation_code = default_token_generator.make_token(user)
+        user.save()
+        self.send_email(serializer.validated_data['email'], confirmation_code)
+        serializer.save(confirmation_code=confirmation_code)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MyTokenObtainApiView(APIView):
@@ -161,13 +158,16 @@ class MyTokenObtainApiView(APIView):
         if serializer.is_valid():
             username = serializer.validated_data['username']
             confirmation_code = serializer.validated_data['confirmation_code']
-            try:
-                user = User.objects.get(username=username,
-                                        confirmation_code=confirmation_code)
-            except User.DoesNotExist:
-                return Response({'username': 'Пользователь не найден!'},
-                                status=status.HTTP_404_NOT_FOUND)
+            user = get_object_or_404(User,
+                                     username=username,
+                                     confirmation_code=confirmation_code)
+            #serializer.save()
+            # except ObjectDoesNotExist:
+            #     return Response({'username': 'Пользователь не найден!'},
+            #                     status=status.HTTP_404_NOT_FOUND)
             access_token = AccessToken.for_user(user)
-            return Response({'token': str(access_token)},
-                            status=status.HTTP_200_OK)
+            return Response({'token': str(access_token)}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+        #return Response({'token': str(access_token)},
+        #                    status=status.HTTP_200_OK)
