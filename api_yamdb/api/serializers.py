@@ -15,8 +15,6 @@ from reviews.models import (Category,
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # role = serializers.CharField(read_only=True)
-
     class Meta:
         model = User
         fields = (
@@ -149,11 +147,3 @@ class MyTokenObtainSerializer(serializers.Serializer):
                 'Отсутствует обязательное поле или оно некорректно!'
             )
         return value
-
-    def validate_code(self, data):
-        user = User.objects.get(username=data['username'])
-        if data['confirmation_code'] != user.confirmation_code:
-            raise serializers.ValidationError(
-                {'Неверный код подтверждения.'}
-            )
-        return data
