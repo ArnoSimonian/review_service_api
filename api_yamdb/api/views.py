@@ -1,31 +1,25 @@
 import random
 
-from django.contrib.auth.tokens import default_token_generator
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.decorators import action
 
-from reviews.models import (Category,
-                            Genre,
-                            Review,
-                            Title,
-                            User)
+from reviews.models import Category, Genre, Review, Title, User
 from .filters import TitleFilter
-from .permissions import IsAdminOrReadOnly, \
-    IsAuthorOrAdminOrModeratorOrReadOnly, IsAdmin
+from .permissions import (IsAdmin, IsAdminOrReadOnly,
+                          IsAuthorOrAdminOrModeratorOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, MyTokenObtainSerializer,
-                          ReviewSerializer, TitleCreateSerializer,
-                          TitleRetrieveListSerializer, UserSerializer,
-                          UserRegistrationSerializer, MeSerializer)
+                          GenreSerializer, MeSerializer,
+                          MyTokenObtainSerializer, ReviewSerializer,
+                          TitleCreateSerializer, TitleRetrieveListSerializer,
+                          UserRegistrationSerializer, UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -149,7 +143,7 @@ class UserRegistrationView(APIView):
             )
         except IntegrityError:
             return Response(
-                'Такой логин или email уже существуют',
+                "Такие логин или email уже существуют",
                 status=status.HTTP_400_BAD_REQUEST
             )
         confirmation_code = self.get_confirmation_code()

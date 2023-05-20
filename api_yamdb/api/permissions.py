@@ -3,7 +3,6 @@ from rest_framework import permissions
 
 class IsAuthorOrAdminOrModeratorOrReadOnly(permissions.BasePermission):
     """
-    Кастомный класс разрешений.
     Разрешает только авторам отзывов и комментариев изменять или удалять их.
     Эти методы доступны также администраторам, модераторам и суперюзеру.
     """
@@ -25,6 +24,11 @@ class IsAuthorOrAdminOrModeratorOrReadOnly(permissions.BasePermission):
 
 
 class IsAdmin(permissions.BasePermission):
+    """
+    Разрешает только администратору и суперюзеру получать и изменять
+    данные о пользователях.
+    """
+
     def has_permission(self, request, view):
         return (
             request.user.is_admin
@@ -33,6 +37,11 @@ class IsAdmin(permissions.BasePermission):
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
+    """
+    Разрешает только администраторам добавлять и изменять данные
+    о произведениях, категориях и жанрах.
+    """
+
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True

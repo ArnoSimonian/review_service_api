@@ -6,12 +6,8 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import (Category,
-                            Comment,
-                            Genre,
-                            Review,
-                            Title,
-                            User)
+from reviews.models import (Category, Comment, Genre,
+                            Review, Title, User)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -43,6 +39,13 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ('name', 'slug')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Category.objects.all(),
+                fields=('name', 'slug'),
+                message="Поле slug каждого жанра должно быть уникальным."
+            )
+        ]
 
 
 class TitleRetrieveListSerializer(serializers.ModelSerializer):
@@ -78,7 +81,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     def validate_year(self, value):
         if value > datetime.date.today().year:
             raise serializers.ValidationError(
-                'Год выпуска произведения не может быть больше текущего.')
+                "Год выпуска произведения не может быть больше текущего.")
         return value
 
     def to_representation(self, instance):
@@ -102,7 +105,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         if request.method == 'POST' and Review.objects.filter(
                 title_id=title_id, author=request.user).exists():
             raise serializers.ValidationError(
-                'Нельзя оставить отзыв к одному произведению дважды.'
+                "Нельзя оставить отзыв к одному произведению дважды."
             )
         return data
 
@@ -126,12 +129,12 @@ class UserRegistrationSerializer(serializers.Serializer):
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(
-                'Это имя использовать запрещено!'
+                "Это имя использовать запрещено!"
             )
         reg_expression = re.compile(r'^[\w.@+-]+\Z')
         if not reg_expression.match(value):
             raise serializers.ValidationError(
-                'Отсутствует обязательное поле или оно некорректно!'
+                "Отсутствует обязательное поле или оно некорректно!"
             )
         return value
 
@@ -144,6 +147,6 @@ class MyTokenObtainSerializer(serializers.Serializer):
         reg_expression = re.compile(r'^[\w.@+-]+\Z')
         if not reg_expression.match(value):
             raise serializers.ValidationError(
-                'Отсутствует обязательное поле или оно некорректно!'
+                "Отсутствует обязательное поле или оно некорректно!"
             )
         return value
