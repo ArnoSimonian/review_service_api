@@ -12,9 +12,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import action
 
 from reviews.models import (Category,
-                            Comment,
                             Genre,
-                            GenreTitle,
                             Review,
                             Title,
                             User)
