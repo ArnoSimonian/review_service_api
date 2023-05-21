@@ -1,7 +1,6 @@
 import datetime
 import re
 
-from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
@@ -51,18 +50,12 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleRetrieveListSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category')
-
-    def get_rating(self, obj):
-        avg = obj.reviews.aggregate(rating=Avg('score'))
-        if not avg['rating']:
-            return None
-        return int(avg['rating'])
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -100,10 +93,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'score', 'pub_date')
 
     def validate(self, data):
-        title_id = self.context['view'].kwargs.get('title_id')
-        request = self.context['request']
-        if request.method == 'POST' and Review.objects.filter(
-                title_id=title_id, author=request.user).exists():
+        if self.context['request'].method == 'POST' and (
+            Review.objects.select_related('author', 'title').filter(
+            title_id=self.context['view'].kwargs.get('title_id'),
+            author=self.context['request'].user).exists()):
             raise serializers.ValidationError(
                 "Нельзя оставить отзыв к одному произведению дважды."
             )

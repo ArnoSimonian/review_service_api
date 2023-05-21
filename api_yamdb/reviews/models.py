@@ -1,8 +1,12 @@
+import datetime
+
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (MaxValueValidator,
                                     MinValueValidator,
                                     RegexValidator)
 from django.db import models
+
+from api.serializers import TitleCreateSerializer
 
 
 class Category(models.Model):
@@ -45,8 +49,10 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField('название', max_length=256)
-    year = models.IntegerField('год выпуска')
-    description = models.TextField('Описание',
+    year = models.PositiveSmallIntegerField('год выпуска',
+                                            db_index=True,
+                                            validators=[TitleCreateSerializer.validate_year])
+    description = models.TextField('описание',
                                    blank=True)
     category = models.ForeignKey(Category,
                                  null=True,
@@ -145,7 +151,7 @@ class Review(models.Model):
                                     auto_now_add=True)
 
     class Meta:
-        ordering = ('-pub_date',)
+        ordering = ('-title',)
         verbose_name = 'отзыв'
         verbose_name_plural = 'отзывы'
         constraints = [
