@@ -40,7 +40,8 @@ class Title(models.Model):
     year = models.PositiveSmallIntegerField(verbose_name='год выпуска',
                                             db_index=True,
                                             validators=[
-                                                MaxValueValidator(dt.date.today().year)
+                                                MaxValueValidator(
+                                                dt.date.today().year)
                                             ])
     description = models.TextField(verbose_name='описание',
                                    blank=True)
@@ -63,8 +64,12 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre,
+                              verbose_name='жанр',
+                              on_delete=models.CASCADE)
+    title = models.ForeignKey(Title,
+                              verbose_name='произведение',
+                              on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'жанр-произведение'
@@ -94,11 +99,13 @@ class User(AbstractUser):
                                     )
                                 ])
     email = models.EmailField(verbose_name='email', max_length=254, unique=True)
-    role = models.CharField(verbose_name='роль',
-                            max_length=150,
-                            choices=ROLE_CHOICES,
-                            default=USER,
-                            blank=True)
+    role = models.CharField(
+        verbose_name='роль',
+        max_length=max(len(role) for role, _ in ROLE_CHOICES),
+        choices=ROLE_CHOICES,
+        default=USER,
+        blank=True
+    )
     first_name = models.CharField(verbose_name='имя', max_length=150, blank=True)
     last_name = models.CharField(verbose_name='фамилия', max_length=150, blank=True)
     bio = models.TextField(verbose_name='биография', blank=True)
@@ -107,15 +114,11 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == self.ADMIN
+        return self.role == self.ADMIN or self.is_superuser or self.is_staff
 
     @property
     def is_moderator(self):
         return self.role == self.MODERATOR
-
-    @property
-    def is_user(self):
-        return self.role == self.USER
 
     class Meta:
         ordering = ('-username',)
@@ -157,7 +160,7 @@ class Review(AbstractReviewComment):
     class Meta(AbstractReviewComment.Meta):
         verbose_name = 'отзыв'
         verbose_name_plural = 'отзывы'
-        default_related_name='reviews'
+        default_related_name = 'reviews'
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'title'],
@@ -174,4 +177,4 @@ class Comment(AbstractReviewComment):
     class Meta(AbstractReviewComment.Meta):
         verbose_name = 'комментарий'
         verbose_name_plural = 'комментарии'
-        default_related_name='comments'
+        default_related_name = 'comments'
