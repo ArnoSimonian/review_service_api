@@ -4,7 +4,7 @@ from django.core.validators import (MaxValueValidator,
                                     RegexValidator)
 from django.db import models
 from reviews.abstract_model import Genre_Category_Abstract
-from reviews.validators import validate_year
+import datetime as dt
 
 
 class Category(Genre_Category_Abstract):
@@ -37,7 +37,8 @@ class Title(models.Model):
     name = models.CharField('название', max_length=256)
     year = models.PositiveSmallIntegerField('год выпуска',
                                             db_index=True,
-                                            validators=[validate_year])
+                                            validators=MaxValueValidator(
+                                                dt.date.today().year))
     description = models.TextField('Описание',
                                    blank=True)
     category = models.ForeignKey(Category,
