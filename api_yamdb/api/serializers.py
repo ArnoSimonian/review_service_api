@@ -15,6 +15,18 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=User.objects.all(),
+                fields=('username', 'email')
+            )
+        ]
+
+    # def validate_username(self, value):
+    #     if value == 'me':
+    #         raise serializers.ValidationError(
+    #             "Это имя использовать запрещено!"
+    #         )
 
 
 class MeSerializer(UserSerializer):

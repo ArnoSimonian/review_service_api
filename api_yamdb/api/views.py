@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
-from api.utils import START_NUM, FINAL_NUM, GAP
+from api.utils import GAP, EMAIL, FINAL_NUM, START_NUM, USERNAME
 from reviews.models import Category, Genre, Review, Title, User
 from .filters import TitleFilter
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
@@ -146,8 +146,10 @@ class UserRegistrationView(APIView):
                 email=email
             )
         except IntegrityError:
+            response = EMAIL if User.objects.filter(
+                email=email).exists() else USERNAME
             return Response(
-                "Такие логин или email уже существуют",
+                response,
                 status=status.HTTP_400_BAD_REQUEST
             )
         confirmation_code = self.get_confirmation_code()
