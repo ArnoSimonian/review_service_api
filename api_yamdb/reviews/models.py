@@ -3,14 +3,13 @@ from django.core.validators import (MaxValueValidator,
                                     MinValueValidator,
                                     RegexValidator)
 from django.db import models
+from reviews.abstract_model import Genre_Category_Abstract
+from reviews.validators import validate_year
 
 
-class Category(models.Model):
-    name = models.CharField('название', max_length=256)
-    slug = models.SlugField('слаг', max_length=50, unique=True)
+class Category(Genre_Category_Abstract):
 
-    class Meta:
-        ordering = ('-name',)
+    class Meta(Genre_Category_Abstract.Meta):
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
         constraints = [
@@ -20,16 +19,10 @@ class Category(models.Model):
             )
         ]
 
-    def __str__(self):
-        return self.slug
 
+class Genre(Genre_Category_Abstract):
 
-class Genre(models.Model):
-    name = models.CharField('название', max_length=256)
-    slug = models.SlugField('слаг', max_length=50, unique=True)
-
-    class Meta:
-        ordering = ('-name',)
+    class Meta(Genre_Category_Abstract.Meta):
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
         constraints = [
@@ -39,13 +32,12 @@ class Genre(models.Model):
             )
         ]
 
-    def __str__(self):
-        return self.slug
-
 
 class Title(models.Model):
     name = models.CharField('название', max_length=256)
-    year = models.IntegerField('год выпуска')
+    year = models.PositiveSmallIntegerField('год выпуска',
+                                            db_index=True,
+                                            validators=[validate_year])
     description = models.TextField('Описание',
                                    blank=True)
     category = models.ForeignKey(Category,
