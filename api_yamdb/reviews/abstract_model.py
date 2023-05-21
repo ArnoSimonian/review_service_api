@@ -1,11 +1,11 @@
 from django.db import models
 
 
-class Genre_Category_Abstract(models.Model):
+class GenreCategoryAbstract(models.Model):
     """Абстрактная модель для Категорий и Жанров"""
 
-    name = models.CharField('название', max_length=256)
-    slug = models.SlugField('слаг', max_length=50, unique=True)
+    name = models.CharField(verbose_name='название', max_length=256)
+    slug = models.SlugField(verbose_name='слаг', max_length=50, unique=True)
 
     class Meta:
         abstract = True
