@@ -94,28 +94,25 @@ class User(AbstractUser):
                                     )
                                 ])
     email = models.EmailField('email', max_length=254, unique=True)
-    role = models.CharField('роль',
-                            max_length=150,
-                            choices=ROLE_CHOICES,
-                            default=USER,
-                            blank=True)
-    first_name = models.CharField(max_length=150, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)
+    role = models.CharField(
+        'роль',
+        max_length=max(len(role) for role, _ in ROLE_CHOICES),
+        choices=ROLE_CHOICES,
+        default=USER,
+        blank=True)
+    first_name = models.CharField('имя', max_length=150, blank=True)
+    last_name = models.CharField('фамилия', max_length=150, blank=True)
     bio = models.TextField('биография', blank=True)
     confirmation_code = models.CharField('код подтверждения',
                                          max_length=4)
 
     @property
     def is_admin(self):
-        return self.role == self.ADMIN
+        return self.role == self.ADMIN or self.is_superuser or self.is_staff
 
     @property
     def is_moderator(self):
         return self.role == self.MODERATOR
-
-    @property
-    def is_user(self):
-        return self.role == self.USER
 
     class Meta:
         ordering = ('-username',)
