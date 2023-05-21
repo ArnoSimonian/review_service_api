@@ -7,7 +7,7 @@ from django.core.validators import (MaxValueValidator,
 from django.db import models
 
 from .abstract_model import GenreCategoryAbstract
-
+from api.utils import CODE_LENGTH, EMAIL_LENGTH, NAME_LENGTH, USERNAME_LENGTH
 
 class Category(GenreCategoryAbstract):
 
@@ -36,7 +36,7 @@ class Genre(GenreCategoryAbstract):
 
 
 class Title(models.Model):
-    name = models.CharField(verbose_name='название', max_length=256)
+    name = models.CharField(verbose_name='название', max_length=NAME_LENGTH)
     year = models.PositiveSmallIntegerField(verbose_name='год выпуска',
                                             db_index=True,
                                             validators=[
@@ -90,7 +90,7 @@ class User(AbstractUser):
     )
 
     username = models.CharField(verbose_name='имя пользователя',
-                                max_length=150,
+                                max_length=USERNAME_LENGTH,
                                 unique=True,
                                 validators=[
                                     RegexValidator(
@@ -98,7 +98,7 @@ class User(AbstractUser):
                                         message='Не соответствует Regex!'
                                     )
                                 ])
-    email = models.EmailField(verbose_name='email', max_length=254, unique=True)
+    email = models.EmailField(verbose_name='email', max_length=EMAIL_LENGTH, unique=True)
     role = models.CharField(
         verbose_name='роль',
         max_length=max(len(role) for role, _ in ROLE_CHOICES),
@@ -106,11 +106,11 @@ class User(AbstractUser):
         default=USER,
         blank=True
     )
-    first_name = models.CharField(verbose_name='имя', max_length=150, blank=True)
-    last_name = models.CharField(verbose_name='фамилия', max_length=150, blank=True)
+    first_name = models.CharField(verbose_name='имя', max_length=USERNAME_LENGTH, blank=True)
+    last_name = models.CharField(verbose_name='фамилия', max_length=USERNAME_LENGTH, blank=True)
     bio = models.TextField(verbose_name='биография', blank=True)
     confirmation_code = models.CharField(verbose_name='код подтверждения',
-                                         max_length=4)
+                                         max_length=CODE_LENGTH)
 
     @property
     def is_admin(self):

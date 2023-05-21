@@ -13,9 +13,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
-from api.utils import GAP, EMAIL, FINAL_NUM, START_NUM, USERNAME
 from reviews.models import Category, Genre, Review, Title, User
 from .filters import TitleFilter
+from .mixins import CreateListDestroyViewSet
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
                           IsAuthorOrAdminOrModeratorOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
@@ -23,6 +23,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           MyTokenObtainSerializer, ReviewSerializer,
                           TitleCreateSerializer, TitleRetrieveListSerializer,
                           UserRegistrationSerializer, UserSerializer)
+from .utils import GAP, EMAIL, FINAL_NUM, START_NUM, USERNAME
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -52,29 +53,14 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class CreateListDestroyViewSet(mixins.CreateModelMixin,
-                               mixins.ListModelMixin,
-                               mixins.DestroyModelMixin,
-                               viewsets.GenericViewSet):
-    pass
-
-
 class GenreViewSet(CreateListDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    lookup_field = 'slug'
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    lookup_field = 'slug'
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
