@@ -1,5 +1,6 @@
 import random
 
+from django.conf import settings
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -11,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
-from django.conf import settings
+from api.utils import START_NUM, FINAL_NUM, GAP
 from reviews.models import Category, Genre, Review, Title, User
 from .filters import TitleFilter
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
@@ -121,15 +122,15 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class UserRegistrationView(APIView):
     def get_confirmation_code(self):
-        return str(random.randrange(settings.START_NUM,
-                                    settings.FINAL_NUM,
-                                    settings.GAP))
+        return str(random.randrange(START_NUM,
+                                    FINAL_NUM,
+                                    GAP))
 
     def send_email(self, email, confirmation_code):
         send_mail(
             'confirmation_code',
             message=confirmation_code,
-            from_email=None,
+            from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
             fail_silently=False,
         )

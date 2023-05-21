@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -86,7 +87,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # EMAIL settings
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 DEFAULT_FROM_EMAIL = 'admin@yamdb.ru'
 
 # SIMPLE_JWT settings
@@ -101,7 +103,7 @@ SIMPLE_JWT = {
 
 # Internationalization
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
@@ -131,7 +133,3 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
 }
-
-START_NUM = 1000
-FINAL_NUM = 9999
-GAP = 1
