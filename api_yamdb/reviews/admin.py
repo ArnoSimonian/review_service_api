@@ -3,6 +3,12 @@ from django.contrib import admin
 from .models import Category, Comment, Genre, GenreTitle, Review, Title, User
 
 
+class GenreInline(admin.TabularInline):
+
+    model = Title.genre.through
+    raw_id_fields = ("genre", )
+
+
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
@@ -16,6 +22,7 @@ class TitleAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = ('year', 'category',)
     empty_value_display = '-пусто-'
+    inlines = [GenreInline]
 
 
 @admin.register(Category)

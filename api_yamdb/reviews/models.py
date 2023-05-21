@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (MaxValueValidator,
@@ -6,15 +6,13 @@ from django.core.validators import (MaxValueValidator,
                                     RegexValidator)
 from django.db import models
 
-from api.serializers import TitleCreateSerializer
+from reviews.abstract_model import Genre_Category_Abstract
+from reviews.validators import validate_year
 
 
-class Category(models.Model):
-    name = models.CharField('название', max_length=256)
-    slug = models.SlugField('слаг', max_length=50, unique=True)
+class Category(Genre_Category_Abstract):
 
-    class Meta:
-        ordering = ('-name',)
+    class Meta(Genre_Category_Abstract.Meta):
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
         constraints = [
@@ -24,16 +22,10 @@ class Category(models.Model):
             )
         ]
 
-    def __str__(self):
-        return self.slug
 
+class Genre(Genre_Category_Abstract):
 
-class Genre(models.Model):
-    name = models.CharField('название', max_length=256)
-    slug = models.SlugField('слаг', max_length=50, unique=True)
-
-    class Meta:
-        ordering = ('-name',)
+    class Meta(Genre_Category_Abstract.Meta):
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
         constraints = [
@@ -43,16 +35,15 @@ class Genre(models.Model):
             )
         ]
 
-    def __str__(self):
-        return self.slug
-
 
 class Title(models.Model):
     name = models.CharField('название', max_length=256)
     year = models.PositiveSmallIntegerField('год выпуска',
                                             db_index=True,
-                                            validators=[TitleCreateSerializer.validate_year])
-    description = models.TextField('описание',
+                                            validators=[
+                                                MaxValueValidator(dt.date.today().year)
+                                            ])
+    description = models.TextField('Описание',
                                    blank=True)
     category = models.ForeignKey(Category,
                                  null=True,
