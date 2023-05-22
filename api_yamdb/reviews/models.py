@@ -6,7 +6,7 @@ from django.core.validators import (MaxValueValidator,
 from django.db import models
 
 from .abstract_model import GenreCategoryAbstract
-from .validators import validate_name
+from .validators import validate_name, validate_genrecategory
 
 from api.utils import CODE_LENGTH, EMAIL_LENGTH, NAME_LENGTH, USERNAME_LENGTH
 
@@ -46,11 +46,12 @@ class Title(models.Model):
     description = models.TextField(verbose_name='описание',
                                    blank=True)
     category = models.ForeignKey(Category,
-                                 null=True,
-                                 on_delete=models.SET_NULL,
+                                 validators=[validate_genrecategory],
+                                 on_delete=models.CASCADE,
                                  related_name='titles',
                                  verbose_name='категория')
     genre = models.ManyToManyField(Genre,
+                                   validators=[validate_genrecategory],
                                    through='GenreTitle',
                                    verbose_name='жанр')
 
