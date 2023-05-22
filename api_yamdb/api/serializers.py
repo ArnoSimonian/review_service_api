@@ -1,6 +1,7 @@
 import datetime
 import re
 
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
@@ -88,6 +89,22 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Год выпуска произведения не может быть больше текущего.")
         return value
+
+    # def validate(self, data):
+    #     data = Title.objects.filter(
+    #         id=self.context['view'].kwargs.get('title_id'))
+    #     if 'genre' not in data:
+    #         raise serializers.ValidationError(
+    #             "Жанр - обязательное поле.")
+
+        # if self.context['request'].method == 'POST' and (
+        #     Review.objects.select_related('author', 'title').filter(
+        #     title_id=self.context['view'].kwargs.get('title_id'),
+        #     author=self.context['request'].user).exists()):
+        #     raise serializers.ValidationError(
+        #         "Нельзя оставить отзыв к одному произведению дважды."
+        #     )
+        # return data
 
     def to_representation(self, instance):
         return TitleRetrieveListSerializer(instance).data
