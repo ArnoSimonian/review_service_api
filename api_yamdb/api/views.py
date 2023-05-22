@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -41,7 +41,6 @@ class UserViewSet(viewsets.ModelViewSet):
             url_path='me')
     def me(self, request):
         user = request.user
-        serializer = self.get_serializer(user)
         if request.method == 'PATCH':
             serializer = MeSerializer(
                 user,
@@ -50,6 +49,8 @@ class UserViewSet(viewsets.ModelViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            return Response(serializer.data)
+        serializer = UserSerializer(user)
         return Response(serializer.data)
 
 
