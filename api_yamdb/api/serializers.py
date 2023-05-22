@@ -1,5 +1,4 @@
 import datetime
-import re
 
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
@@ -7,6 +6,7 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import (Category, Comment, Genre,
                             Review, Title, User)
+from reviews.validators import validate_name
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,11 +21,8 @@ class UserSerializer(serializers.ModelSerializer):
             )
         ]
 
-    # def validate_username(self, value):
-    #     if value == 'me':
-    #         raise serializers.ValidationError(
-    #             "Это имя использовать запрещено!"
-    #         )
+    def validate_username(self, value):
+        return validate_name(value)
 
 
 class MeSerializer(UserSerializer):
@@ -106,9 +103,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if self.context['request'].method == 'POST' and (
-            Review.objects.select_related('author', 'title').filter(
-            title_id=self.context['view'].kwargs.get('title_id'),
-            author=self.context['request'].user).exists()):
+                Review.objects.select_related('author', 'title').filter(
+                    title_id=self.context['view'].kwargs.get('title_id'),
+                    author=self.context['request'].user).exists()):
             raise serializers.ValidationError(
                 "Нельзя оставить отзыв к одному произведению дважды."
             )
@@ -132,16 +129,7 @@ class UserRegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=254)
 
     def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                "Это имя использовать запрещено!"
-            )
-        reg_expression = re.compile(r'^[\w.@+-]+\Z')
-        if not reg_expression.match(value):
-            raise serializers.ValidationError(
-                "Отсутствует обязательное поле или оно некорректно!"
-            )
-        return value
+        return validate_name(value)
 
 
 class MyTokenObtainSerializer(serializers.Serializer):
@@ -149,9 +137,4 @@ class MyTokenObtainSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField()
 
     def validate_username(self, value):
-        reg_expression = re.compile(r'^[\w.@+-]+\Z')
-        if not reg_expression.match(value):
-            raise serializers.ValidationError(
-                "Отсутствует обязательное поле или оно некорректно!"
-            )
-        return value
+        return validate_name(value)

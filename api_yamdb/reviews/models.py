@@ -2,11 +2,11 @@ import datetime as dt
 
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (MaxValueValidator,
-                                    MinValueValidator,
-                                    RegexValidator)
+                                    MinValueValidator)
 from django.db import models
 
 from .abstract_model import GenreCategoryAbstract
+from .validators import validate_name
 
 
 class Category(GenreCategoryAbstract):
@@ -92,12 +92,7 @@ class User(AbstractUser):
     username = models.CharField(verbose_name='имя пользователя',
                                 max_length=150,
                                 unique=True,
-                                validators=[
-                                    RegexValidator(
-                                        regex=r'^[\w.@+-]+\Z',
-                                        message='Не соответствует Regex!'
-                                    )
-                                ])
+                                validators=[validate_name])
     email = models.EmailField(verbose_name='email', max_length=254, unique=True)
     role = models.CharField(
         verbose_name='роль',

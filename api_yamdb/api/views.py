@@ -167,7 +167,13 @@ class MyTokenObtainApiView(APIView):
         username = serializer.validated_data['username']
         confirmation_code = serializer.validated_data['confirmation_code']
         user = get_object_or_404(User, username=username)
-        if confirmation_code == user.confirmation_code:
+        if (confirmation_code == user.confirmation_code
+                and confirmation_code != 0):
             token = str(AccessToken.for_user(user))
+            user.confirmation_code = 0
+            user.save()
             return Response({'token': token}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {'confirmation_code: Неверный пин-код'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
