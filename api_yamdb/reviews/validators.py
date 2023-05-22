@@ -13,3 +13,9 @@ def validate_name(value):
             f'Не допустимые символы <{value}> в имени пользователя.'
         )
     return value
+
+
+def validate_genrecategory(value):
+    if not value:
+        raise serializers.ValidationError("Пустое поле недопустимо")
+    return value
