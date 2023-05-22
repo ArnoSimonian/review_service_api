@@ -2,15 +2,16 @@ import datetime as dt
 
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (MaxValueValidator,
-                                    MinValueValidator,
-                                    RegexValidator)
+                                    MinValueValidator)
 from django.db import models
 
 from .abstract_model import GenreCategoryAbstract
+from .validators import validate_name
+
 from api.utils import CODE_LENGTH, EMAIL_LENGTH, NAME_LENGTH, USERNAME_LENGTH
 
-class Category(GenreCategoryAbstract):
 
+class Category(GenreCategoryAbstract):
     class Meta(GenreCategoryAbstract.Meta):
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
@@ -23,7 +24,6 @@ class Category(GenreCategoryAbstract):
 
 
 class Genre(GenreCategoryAbstract):
-
     class Meta(GenreCategoryAbstract.Meta):
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
@@ -41,7 +41,7 @@ class Title(models.Model):
                                             db_index=True,
                                             validators=[
                                                 MaxValueValidator(
-                                                dt.date.today().year)
+                                                    dt.date.today().year)
                                             ])
     description = models.TextField(verbose_name='описание',
                                    blank=True)
@@ -93,13 +93,10 @@ class User(AbstractUser):
     username = models.CharField(verbose_name='имя пользователя',
                                 max_length=USERNAME_LENGTH,
                                 unique=True,
-                                validators=[
-                                    RegexValidator(
-                                        regex=r'^[\w.@+-]+\Z',
-                                        message='Не соответствует Regex!'
-                                    )
-                                ])
-    email = models.EmailField(verbose_name='email', max_length=EMAIL_LENGTH, unique=True)
+                                validators=[validate_name])
+    email = models.EmailField(verbose_name='email',
+                              max_length=EMAIL_LENGTH,
+                              unique=True)
     role = models.CharField(
         verbose_name='роль',
         max_length=max(len(role) for role, _ in ROLE_CHOICES),
@@ -107,8 +104,12 @@ class User(AbstractUser):
         default=USER,
         blank=True
     )
-    first_name = models.CharField(verbose_name='имя', max_length=USERNAME_LENGTH, blank=True)
-    last_name = models.CharField(verbose_name='фамилия', max_length=USERNAME_LENGTH, blank=True)
+    first_name = models.CharField(verbose_name='имя',
+                                  max_length=USERNAME_LENGTH,
+                                  blank=True)
+    last_name = models.CharField(verbose_name='фамилия',
+                                 max_length=USERNAME_LENGTH,
+                                 blank=True)
     bio = models.TextField(verbose_name='биография', blank=True)
     confirmation_code = models.CharField(verbose_name='код подтверждения',
                                          max_length=CODE_LENGTH)
