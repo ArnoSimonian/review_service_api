@@ -87,6 +87,11 @@ class TitleCreateSerializer(serializers.ModelSerializer):
                 "Год выпуска произведения не может быть больше текущего.")
         return value
 
+    # def validate_genretitle(value):
+    #     if not value:
+    #         raise serializers.ValidationError("Пустое поле недопустимо")
+    #     return value
+
     # def validate(self, data):
     #     data = Title.objects.filter(
     #         id=self.context['view'].kwargs.get('title_id'))
