@@ -69,8 +69,7 @@ class TitleRetrieveListSerializer(serializers.ModelSerializer):
 
 class TitleCreateSerializer(serializers.ModelSerializer):
     category = SlugRelatedField(slug_field='slug',
-                                queryset=Category.objects.all(),
-                                validators=[validate_genrecategory])
+                                queryset=Category.objects.all())
     genre = SlugRelatedField(slug_field='slug',
                              queryset=Genre.objects.all(),
                              many=True,

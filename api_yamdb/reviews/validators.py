@@ -16,6 +16,6 @@ def validate_name(value):
 
 
 def validate_genrecategory(value):
-    if not value:
+    if len(value) == 0:
         raise serializers.ValidationError("Пустое поле недопустимо")
     return value

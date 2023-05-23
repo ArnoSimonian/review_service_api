@@ -46,7 +46,6 @@ class Title(models.Model):
     description = models.TextField(verbose_name='описание',
                                    blank=True)
     category = models.ForeignKey(Category,
-                                 validators=[validate_genrecategory],
                                  on_delete=models.CASCADE,
                                  related_name='titles',
                                  verbose_name='категория')
