@@ -4,7 +4,9 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import (Category, Comment, Genre,
                             Review, Title, User)
-from reviews.validators import validate_genre_field, validate_name, validate_year_field
+from reviews.validators import (validate_genre_field, validate_name,
+                                validate_year_field)
+from .utils import EMAIL_LENGTH, USERNAME_LENGTH
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -123,15 +125,15 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
-    email = serializers.EmailField(max_length=254)
+    username = serializers.CharField(max_length=USERNAME_LENGTH)
+    email = serializers.EmailField(max_length=EMAIL_LENGTH)
 
     def validate_username(self, value):
         return validate_name(value)
 
 
 class MyTokenObtainSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
+    username = serializers.CharField(max_length=USERNAME_LENGTH)
     confirmation_code = serializers.CharField()
 
     def validate_username(self, value):

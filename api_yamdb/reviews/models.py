@@ -5,10 +5,9 @@ from django.core.validators import (MaxValueValidator,
                                     MinValueValidator)
 from django.db import models
 
-from .abstract_model import GenreCategoryAbstract
-from .validators import validate_name, validate_genre_field
-
 from api.utils import CODE_LENGTH, EMAIL_LENGTH, NAME_LENGTH, USERNAME_LENGTH
+from .abstract_model import GenreCategoryAbstract
+from .validators import validate_genre_field, validate_name
 
 
 class Category(GenreCategoryAbstract):
@@ -46,7 +45,6 @@ class Title(models.Model):
     description = models.TextField(verbose_name='описание',
                                    blank=True)
     category = models.ForeignKey(Category,
-                                 #validators=[validate_genre_field],
                                  on_delete=models.CASCADE,
                                  related_name='titles',
                                  verbose_name='категория')
@@ -132,7 +130,7 @@ class User(AbstractUser):
 
 
 class AbstractReviewComment(models.Model):
-    """Абстрактная модель для Отзывов и Комментариев"""
+    """Абстрактная модель для Отзывов и Комментариев."""
 
     text = models.TextField(verbose_name='текст')
     author = models.ForeignKey(User,
