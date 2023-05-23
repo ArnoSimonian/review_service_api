@@ -1,12 +1,10 @@
-import datetime
-
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import (Category, Comment, Genre,
                             Review, Title, User)
-from reviews.validators import validate_name, validate_genrecategory
+from reviews.validators import validate_genre_field, validate_name, validate_year_field
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -72,8 +70,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
                                 queryset=Category.objects.all())
     genre = SlugRelatedField(slug_field='slug',
                              queryset=Genre.objects.all(),
-                             many=True,
-                             validators=[validate_genrecategory])
+                             many=True)
     rating = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -82,10 +79,10 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category')
 
     def validate_year(self, value):
-        if value > datetime.date.today().year:
-            raise serializers.ValidationError(
-                "Год выпуска произведения не может быть больше текущего.")
-        return value
+        return validate_year_field(value)
+
+    def validate_genre(self, value):
+        return validate_genre_field(value)
 
     def to_representation(self, instance):
         return TitleRetrieveListSerializer(instance).data
