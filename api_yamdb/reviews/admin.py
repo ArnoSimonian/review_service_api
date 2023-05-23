@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
 
-from .models import Category, Comment, Genre, GenreTitle, Review, Title, User
+from .models import Category, Comment, Genre, Review, Title, User
 
 
 class GenreInline(admin.TabularInline):
@@ -71,6 +71,7 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('username', 'email',)
     list_filter = ('username',)
     empty_value_display = '-пусто-'
+
 
 admin.site.register(Review)
 admin.site.register(Comment)
