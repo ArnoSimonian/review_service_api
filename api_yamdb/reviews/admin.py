@@ -27,7 +27,7 @@ class TitleAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
     inlines = [GenreInline]
 
-    @admin.display(description='genres')
+    @admin.display(description='Жанры')
     def get_genres(self, obj):
         return [genre.name for genre in obj.genre.all()]
 
