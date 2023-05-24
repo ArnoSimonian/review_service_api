@@ -23,7 +23,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           MyTokenObtainSerializer, ReviewSerializer,
                           TitleCreateSerializer, TitleRetrieveListSerializer,
                           UserRegistrationSerializer, UserSerializer)
-from .utils import GAP, EMAIL, FINAL_NUM, START_NUM, USERNAME
+from .utils import EMAIL, FINAL_NUM, GAP, START_NUM, USERNAME
 
 
 class UserViewSet(viewsets.ModelViewSet):
