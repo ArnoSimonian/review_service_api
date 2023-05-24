@@ -9,9 +9,15 @@ def validate_name(value):
         raise serializers.ValidationError(
             "Это имя использовать запрещено!"
         )
-    if re.search(r'^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$', value) is None:
+    # if re.search(r'^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$', value) is None:
+    #     raise serializers.ValidationError(
+    #         f'Недопустимые символы <{value}> в имени пользователя.'
+    #     )
+    result = re.sub('([\w.@+-]+)', '', value)
+    result_set = set(result)
+    if len(result_set) != 0:
         raise serializers.ValidationError(
-            f'Недопустимые символы <{value}> в имени пользователя.'
+            f'Недопустимые символы {result_set} в имени пользователя.'
         )
     return value
 

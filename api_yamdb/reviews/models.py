@@ -168,11 +168,15 @@ class Review(AbstractReviewComment):
     title = models.ForeignKey(Title,
                               on_delete=models.CASCADE,
                               verbose_name='произведение')
-    score = models.PositiveSmallIntegerField(verbose_name='оценка',
-                                             validators=[
-                                                 MinValueValidator(1),
-                                                 MaxValueValidator(10)
-                                             ])
+    score = models.PositiveSmallIntegerField(
+        verbose_name='оценка',
+        validators=[
+            MinValueValidator(1,
+                              message="Введите целое число не менее 1."),
+            MaxValueValidator(10,
+                              message="Введите целое число не более 10.")
+        ]
+    )
 
     class Meta(AbstractReviewComment.Meta):
         verbose_name = 'отзыв'
