@@ -1,5 +1,3 @@
-import datetime as dt
-
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (MaxValueValidator,
                                     MinValueValidator)
@@ -7,7 +5,8 @@ from django.db import models
 
 from api.utils import (CODE_LENGTH, EMAIL_LENGTH, NAME_LENGTH,
                        USERNAME_LENGTH, SLUG_LENGTH)
-from .validators import validate_genre_field, validate_name, validate_year_field
+from .validators import (validate_genre_field, validate_name,
+                         validate_year_field)
 
 
 class AbstractNameSlug(models.Model):

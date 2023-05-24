@@ -9,7 +9,7 @@ def validate_name(value):
         raise serializers.ValidationError(
             "Это имя использовать запрещено!"
         )
-    result = re.sub('[a-z0-9.@+-]', '', value)
+    result = re.sub('[a-zA-Z][a-zA-Z0-9-_\.]{1,20}', '', value)
     result_set = set(result)
     if len(result_set) != 0:
         raise serializers.ValidationError(
