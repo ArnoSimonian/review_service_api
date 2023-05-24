@@ -7,10 +7,10 @@ from django.db import models
 
 from api.utils import (CODE_LENGTH, EMAIL_LENGTH, NAME_LENGTH,
                        USERNAME_LENGTH, SLUG_LENGTH)
-from .validators import validate_genre_field, validate_name
+from .validators import validate_genre_field, validate_name, validate_year_field
 
 
-class GenreCategoryAbstract(models.Model):
+class AbstractNameSlug(models.Model):
     """Абстрактная модель для Категорий и Жанров."""
 
     name = models.CharField(verbose_name='название',
@@ -27,8 +27,8 @@ class GenreCategoryAbstract(models.Model):
         return self.slug
 
 
-class Category(GenreCategoryAbstract):
-    class Meta(GenreCategoryAbstract.Meta):
+class Category(AbstractNameSlug):
+    class Meta(AbstractNameSlug.Meta):
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
         constraints = [
@@ -39,8 +39,8 @@ class Category(GenreCategoryAbstract):
         ]
 
 
-class Genre(GenreCategoryAbstract):
-    class Meta(GenreCategoryAbstract.Meta):
+class Genre(AbstractNameSlug):
+    class Meta(AbstractNameSlug.Meta):
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
         constraints = [
@@ -55,10 +55,7 @@ class Title(models.Model):
     name = models.CharField(verbose_name='название', max_length=NAME_LENGTH)
     year = models.PositiveSmallIntegerField(verbose_name='год выпуска',
                                             db_index=True,
-                                            validators=[
-                                                MaxValueValidator(
-                                                    dt.date.today().year)
-                                            ])
+                                            validators=[validate_year_field])
     description = models.TextField(verbose_name='описание',
                                    blank=True)
     category = models.ForeignKey(Category,
@@ -146,7 +143,7 @@ class User(AbstractUser):
         return self.username
 
 
-class AbstractReviewComment(models.Model):
+class AbstractTextAuthorPubdate(models.Model):
     """Абстрактная модель для Отзывов и Комментариев."""
 
     text = models.TextField(verbose_name='текст')
@@ -164,7 +161,7 @@ class AbstractReviewComment(models.Model):
         return self.text[:10]
 
 
-class Review(AbstractReviewComment):
+class Review(AbstractTextAuthorPubdate):
     title = models.ForeignKey(Title,
                               on_delete=models.CASCADE,
                               verbose_name='произведение')
@@ -178,7 +175,7 @@ class Review(AbstractReviewComment):
         ]
     )
 
-    class Meta(AbstractReviewComment.Meta):
+    class Meta(AbstractTextAuthorPubdate.Meta):
         verbose_name = 'отзыв'
         verbose_name_plural = 'отзывы'
         default_related_name = 'reviews'
@@ -190,12 +187,12 @@ class Review(AbstractReviewComment):
         ]
 
 
-class Comment(AbstractReviewComment):
+class Comment(AbstractTextAuthorPubdate):
     review = models.ForeignKey(Review,
                                on_delete=models.CASCADE,
                                verbose_name='отзыв')
 
-    class Meta(AbstractReviewComment.Meta):
+    class Meta(AbstractTextAuthorPubdate.Meta):
         verbose_name = 'комментарий'
         verbose_name_plural = 'комментарии'
         default_related_name = 'comments'
