@@ -41,6 +41,7 @@ class UserViewSet(viewsets.ModelViewSet):
             url_path='me')
     def me(self, request):
         user = request.user
+        serializer = UserSerializer(user)
         if request.method == 'PATCH':
             serializer = MeSerializer(
                 user,
@@ -49,8 +50,6 @@ class UserViewSet(viewsets.ModelViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data)
-        serializer = UserSerializer(user)
         return Response(serializer.data)
 
 
